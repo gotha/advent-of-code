@@ -1,4 +1,3 @@
-import re
 import sys
 
 if len(sys.argv) < 2:
@@ -6,39 +5,25 @@ if len(sys.argv) < 2:
     sys.exit(1)
 
 f = open(sys.argv[1], 'r')
-data = f.read()
-f.close()
-
-colour_max = {
-    "red": 12,
-    "green": 13,
-    "blue": 14,
-}
-colours = list(colour_max.keys())
-
-games = {}
+colour_max = {"red": 12, "green": 13, "blue": 14}
 
 sumOfValids = 0
-for line in data.splitlines():
-    res = re.findall('^Game ([0-9]+):', line)
-    if len(res) < 1:
-        raise Exception("Cannot determine game number")
-    gameNumber = res[0]
-    line = line[len("Game " + gameNumber) + 2:]
+for line in f.read().splitlines():
+    res = line.split(":")
+    gameNumber = res[0].replace("Game ", "")
+    sets = res[1].split(";")
+    invalidSet = False
+    for s in sets:
+        items = list(s.split(","))
+        for i in items:
+            [_, num, colour] = i.split(" ")
+            if int(num) > colour_max[colour]:
+                invalidSet = True
+                break
+    if invalidSet:
+        continue
 
-    isLineValid = True
-    for set in line.split(";"):
-        isSetValid = True
-        for colour in colours:
-            res = re.findall("([0-9]+) " + colour, set)
-            if len(res) > 0:
-                if int(res[0]) > colour_max[colour]:
-                    isSetValid = False
-        if isSetValid is False:
-            isLineValid = False
-
-    if isLineValid:
-        sumOfValids += int(gameNumber)
-    print("num " + gameNumber + ": " + str(isLineValid))
+    sumOfValids += int(gameNumber)
 
 print(sumOfValids)
+f.close()
