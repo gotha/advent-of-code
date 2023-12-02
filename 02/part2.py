@@ -13,18 +13,12 @@ colours = ["red", "green", "blue"]
 
 total = 0
 for line in data.splitlines():
-    res = re.findall('^Game ([0-9]+):', line)
-    if len(res) < 1:
-        raise Exception("Cannot determine game number")
-    gameNumber = res[0]
-    line = line[len("Game " + gameNumber) + 2:]
-    print(line)
+    line = line.split(":")[1]
 
-    lineMaxColours = {
-        "red": 0,
-        "green": 0,
-        "blue": 0,
-    }
+    lineMaxColours = {}
+    for c in colours:
+        lineMaxColours[c] = 0
+
     for set in line.split(";"):
         for colour in colours:
             res = re.findall("([0-9]+) " + colour, set)
@@ -33,10 +27,10 @@ for line in data.splitlines():
                 if val > lineMaxColours[colour]:
                     lineMaxColours[colour] = val
 
-    setPower = lineMaxColours["red"] * \
-        lineMaxColours["blue"] * lineMaxColours["green"]
+    setPower = 1
+    for c in colours:
+        setPower *= lineMaxColours[c]
 
     total += setPower
-    print("======================")
 
 print(total)
